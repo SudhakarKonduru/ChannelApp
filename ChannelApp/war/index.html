@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>Basic Chat Service</title>
+		<script src='/_ah/channel/jsapi'></script>
+	</head>
+	<body>
+	
+		<script>
+			function setupChannel() {
+				var xmlhttp;
+				if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+		  			xmlhttp=new XMLHttpRequest();
+		  		} else {// code for IE6, IE5
+		  			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		  		}
+				xmlhttp.onreadystatechange=function() {
+		  			if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+		    			respObjStr = xmlhttp.responseText;
+		    			respObj = JSON.parse(respObjStr);
+		    			document.getElementById("messages").innerHTML = "token: " + respObj.token;
+		    			openSocket(respObj.token);
+		    		}
+		  		}
+				xmlhttp.open("POST", "setupChannel", true);
+				xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+				xmlhttp.send("clientId=" + document.getElementById('clientId').value);
+			}
+			
+			function sendChannelMessage() {
+				var xmlhttp;
+				if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+		  			xmlhttp=new XMLHttpRequest();
+		  		} else {// code for IE6, IE5
+		  			xmlhttp=new ActiveXObject("Microsoft.XMLHTTP");
+		  		}
+				xmlhttp.onreadystatechange=function() {
+		  			if (xmlhttp.readyState==4 && xmlhttp.status==200) {
+		    		}
+		  		}
+				xmlhttp.open("POST", "sendChannelMessage", true);
+				xmlhttp.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+				xmlhttp.send("message=" + document.getElementById('message').value);
+			}
+			
+			function onOpened() {
+				document.getElementById("messages").innerHTML =
+					document.getElementById("messages").innerHTML + "\n" + "Scoket is opened"
+			}
+			
+			function onMessage(message) {
+				document.getElementById("messages").innerHTML =
+					document.getElementById("messages").innerHTML + "\n" + "Message: " + message.data;
+			}
+			
+			function onError() {
+				document.getElementById("messages").innerHTML =
+					document.getElementById("messages").innerHTML + "\n" + "Channel Error"
+			}
+			
+			function onClose() {
+				document.getElementById("messages").innerHTML =
+					document.getElementById("messages").innerHTML + "\n" + "Chanel Closed"
+			}
+			
+			openSocket = function(token) {
+				channel = new goog.appengine.Channel(token);
+				socket = channel.open();
+				socket.onopen = onOpened;
+				socket.onmessage = onMessage
+				socket.onerror = onError;
+				socket.onclose = onClose;
+			}
+			
+		</script>
+		
+	 <table>
+	  <tr>
+	   <td>
+		  <fieldset>
+		   <legend>Create Channel</legend>
+			 ClientId <input type="text" id="clientId" size="10" value=""><br>
+			 <button type="button" onclick="setupChannel()">SetupChannel</button>
+		  </fieldset>
+		<br>
+	   </td>
+	  </tr>
+	  <tr>
+	   <td>
+		<form name="sendMessage" action="sendChannelMessage" method="post">
+		  <fieldset>
+		   <legend>Send Message</legend>
+			 Message <input type="text" id="message" value=""><br>
+			 <button type="button" onclick="sendChannelMessage()">SendChannelMessage</button>
+		  </fieldset>
+		</form>
+		<br>
+	   </td>
+	  </tr>
+	  <tr>
+	   <td>	  
+		<fieldset>
+		   <legend>Messages</legend>
+			 <textarea id="messages" rows="10" cols="50"></textarea>
+		</fieldset>
+	   </td>
+	  </tr>
+	 </table>
+	</body>
+</html>
